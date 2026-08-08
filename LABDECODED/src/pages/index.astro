@@ -1,0 +1,19 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { calculators, categories } from "../engine/calculator-registry";
+const featured = calculators.filter(c=>c.featured).slice(0,9);
+---
+<BaseLayout title="Medical & Laboratory Calculators" description="Professional medical and laboratory calculators from LABDECODED.">
+<section class="hero"><div class="container hero-grid"><div>
+<span class="eyebrow">CLINICAL • LABORATORY • SCIENTIFIC</span>
+<h1>Decode the Lab.<br/>Understand the Numbers.</h1>
+<p>Beautiful, practical calculators for clinical laboratories, healthcare professionals, researchers and students.</p>
+<form class="search" action="/calculators/"><input name="q" placeholder="Search medical or laboratory calculators…" /><button class="btn">Explore</button></form>
+</div><div class="hero-card"><div class="pulse">∑</div><strong>Built for laboratory thinking</strong><p style="color:#d9f4f3">Fast browser-based calculations, transparent formulas and clinical context — without unnecessary complexity.</p></div></div></section>
+<section class="section"><div class="container"><div class="section-head"><div><span class="tag">Popular tools</span><h2>Featured calculators</h2></div><a class="muted" href="/calculators/">View all →</a></div><div class="grid">
+{featured.map(c=><a class="card" href={`/calculators/${c.slug}/`}><span class="tag">{c.category}</span><h3>{c.title}</h3><p class="muted">{c.description}</p></a>)}
+</div></div></section>
+<section class="section"><div class="container"><div class="section-head"><div><span class="tag">Explore</span><h2>Browse by specialty</h2></div></div><div class="grid category-grid">
+{categories.map(cat=><a class="card" href={`/categories/${cat.toLowerCase().replaceAll(" ","-")}/`}><h3>{cat}</h3><p class="muted">{calculators.filter(c=>c.category===cat).length} calculators</p></a>)}
+</div></div></section>
+</BaseLayout>

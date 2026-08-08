@@ -1,0 +1,705 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { calculators, categories } from "../../engine/calculator-registry";
+
+const q = Astro.url.searchParams.get("q")?.trim() || "";
+---
+
+<BaseLayout title="Medical Calculators | LabDecoded">
+
+<main class="page">
+
+  <section class="hero">
+
+    <div class="badge">
+      LABDECODED • MEDICAL CALCULATORS
+    </div>
+
+    <h1>
+      Medical & Laboratory
+      <span>Calculators</span>
+    </h1>
+
+    <p>
+      Clinical and laboratory calculators for healthcare professionals,
+      laboratory scientists, researchers and students.
+    </p>
+
+    <div class="search-container">
+
+      <input
+        id="calculatorSearch"
+        type="search"
+        placeholder="Search BMI, eGFR, FIB-4, sodium, anion gap..."
+        value={q}
+        autocomplete="off"
+      />
+
+      <button
+        id="clearSearch"
+        type="button"
+      >
+        Clear
+      </button>
+
+    </div>
+
+    <div id="searchStatus" class="search-status"></div>
+
+  </section>
+
+
+  <section class="category-section">
+
+    <h2>Categories</h2>
+
+    <div class="categories">
+
+      <button
+        type="button"
+        class="category-button active"
+        data-category=""
+      >
+        All
+      </button>
+
+      {
+        categories.map((category) => (
+          <button
+            type="button"
+            class="category-button"
+            data-category={category}
+          >
+            {category}
+          </button>
+        ))
+      }
+
+    </div>
+
+  </section>
+
+
+  <section>
+
+    <div class="results-header">
+
+      <h2>Calculators</h2>
+
+      <span id="resultCount">
+        {calculators.length} calculators
+      </span>
+
+    </div>
+
+
+    <div
+      id="calculatorGrid"
+      class="calculator-grid"
+    >
+
+      {
+        calculators.map((calculator) => (
+
+          <a
+            class="calculator-card"
+            href={`/calculators/${calculator.slug}/`}
+
+            data-title={calculator.title}
+            data-description={calculator.description}
+            data-category={calculator.category}
+            data-slug={calculator.slug}
+            data-keywords={(calculator.keywords || []).join(" ")}
+          >
+
+            <div class="card-header">
+
+              <span class="category">
+                {calculator.category}
+              </span>
+
+              <span class="arrow">
+                →
+              </span>
+
+            </div>
+
+            <h3>
+              {calculator.title}
+            </h3>
+
+            <p>
+              {calculator.description}
+            </p>
+
+            {
+              calculator.keywords &&
+              calculator.keywords.length > 0 && (
+
+                <div class="keywords">
+
+                  {
+                    calculator.keywords
+                      .slice(0, 5)
+                      .map((keyword) => (
+                        <span>
+                          {keyword}
+                        </span>
+                      ))
+                  }
+
+                </div>
+
+              )
+            }
+
+          </a>
+
+        ))
+      }
+
+    </div>
+
+
+    <div
+      id="noResults"
+      class="no-results"
+      hidden
+    >
+
+      <div class="no-results-icon">
+        🔎
+      </div>
+
+      <h2>
+        No calculator found
+      </h2>
+
+      <p>
+        Try another search term.
+      </p>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<script>
+
+  const searchInput =
+    document.getElementById("calculatorSearch");
+
+  const clearButton =
+    document.getElementById("clearSearch");
+
+  const resultCount =
+    document.getElementById("resultCount");
+
+  const searchStatus =
+    document.getElementById("searchStatus");
+
+  const calculatorGrid =
+    document.getElementById("calculatorGrid");
+
+  const noResults =
+    document.getElementById("noResults");
+
+  const cards =
+    Array.from(
+      document.querySelectorAll(".calculator-card")
+    );
+
+  const categoryButtons =
+    Array.from(
+      document.querySelectorAll(".category-button")
+    );
+
+
+  let activeCategory = "";
+
+
+  function normalize(value) {
+
+    return String(value || "")
+      .toLowerCase()
+      .trim();
+
+  }
+
+
+  function searchCalculators() {
+
+    const query =
+      normalize(searchInput?.value);
+
+    let visible = 0;
+
+
+    cards.forEach((card) => {
+
+      const title =
+        normalize(card.getAttribute("data-title"));
+
+      const description =
+        normalize(card.getAttribute("data-description"));
+
+      const category =
+        normalize(card.getAttribute("data-category"));
+
+      const slug =
+        normalize(card.getAttribute("data-slug"));
+
+      const keywords =
+        normalize(card.getAttribute("data-keywords"));
+
+
+      const searchableText =
+        [
+          title,
+          description,
+          category,
+          slug,
+          keywords
+        ].join(" ");
+
+
+      const matchesSearch =
+        !query ||
+        searchableText.includes(query);
+
+
+      const matchesCategory =
+        !activeCategory ||
+        category === normalize(activeCategory);
+
+
+      const show =
+        matchesSearch &&
+        matchesCategory;
+
+
+      card.style.display =
+        show ? "" : "block";
+
+      if (!show) {
+        card.style.display = "none";
+      }
+
+      if (show) {
+        visible++;
+      }
+
+    });
+
+
+    resultCount.textContent =
+      `${visible} calculator${visible === 1 ? "" : "s"}`;
+
+
+    if (query) {
+
+      searchStatus.textContent =
+        `${visible} result${visible === 1 ? "" : "s"} found for "${query}"`;
+
+    } else if (activeCategory) {
+
+      searchStatus.textContent =
+        `${visible} calculator${visible === 1 ? "" : "s"} in ${activeCategory}`;
+
+    } else {
+
+      searchStatus.textContent = "";
+
+    }
+
+
+    noResults.hidden =
+      visible !== 0;
+
+
+    calculatorGrid.style.display =
+      visible === 0 ? "none" : "grid";
+
+  }
+
+
+  searchInput?.addEventListener(
+    "input",
+    searchCalculators
+  );
+
+
+  clearButton?.addEventListener(
+    "click",
+    () => {
+
+      searchInput.value = "";
+
+      activeCategory = "";
+
+      categoryButtons.forEach(
+        (button) => {
+
+          button.classList.remove("active");
+
+        }
+      );
+
+
+      categoryButtons[0]?.classList.add("active");
+
+      searchCalculators();
+
+      searchInput.focus();
+
+      const url =
+        new URL(window.location.href);
+
+      url.searchParams.delete("q");
+
+      window.history.replaceState(
+        {},
+        "",
+        url.pathname
+      );
+
+    }
+  );
+
+
+  categoryButtons.forEach(
+    (button) => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          activeCategory =
+            button.getAttribute("data-category") || "";
+
+
+          categoryButtons.forEach(
+            (item) => {
+
+              item.classList.remove("active");
+
+            }
+          );
+
+
+          button.classList.add("active");
+
+          searchCalculators();
+
+        }
+      );
+
+    }
+  );
+
+
+  searchInput?.addEventListener(
+    "keydown",
+    (event) => {
+
+      if (event.key === "Escape") {
+
+        searchInput.value = "";
+
+        searchCalculators();
+
+      }
+
+    }
+  );
+
+
+  searchCalculators();
+
+</script>
+
+
+<style>
+
+.page {
+  max-width: 1200px;
+  margin: auto;
+  padding: 30px 20px 80px;
+}
+
+
+.hero {
+  text-align: center;
+  padding: 50px 10px 40px;
+}
+
+
+.badge {
+  display: inline-block;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+
+.hero h1 {
+  margin: 20px 0 15px;
+  font-size: clamp(38px, 6vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+
+.hero h1 span {
+  display: block;
+  color: #2563eb;
+}
+
+
+.hero p {
+  max-width: 700px;
+  margin: auto;
+  color: #64748b;
+  line-height: 1.7;
+  font-size: 17px;
+}
+
+
+.search-container {
+  max-width: 750px;
+  margin: 30px auto 10px;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: white;
+  border: 1px solid #dbe3ee;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgba(15,23,42,.08);
+}
+
+
+.search-container input {
+  flex: 1;
+  border: 0;
+  outline: none;
+  padding: 14px;
+  font-size: 16px;
+  min-width: 0;
+}
+
+
+.search-container button {
+  border: 0;
+  padding: 0 20px;
+  border-radius: 10px;
+  background: #0f172a;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+
+.search-status {
+  min-height: 22px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+
+.category-section {
+  margin: 20px 0 45px;
+}
+
+
+.category-section h2 {
+  margin-bottom: 15px;
+}
+
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+
+.category-button {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #334155;
+  padding: 9px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+
+.category-button:hover,
+.category-button.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+
+.results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+
+.results-header h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+
+#resultCount {
+  color: #64748b;
+  font-size: 14px;
+}
+
+
+.calculator-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+
+.calculator-card {
+  display: block;
+  padding: 22px;
+  min-height: 185px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: white;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform .2s,
+    box-shadow .2s,
+    border-color .2s;
+}
+
+
+.calculator-card:hover {
+  transform: translateY(-4px);
+  border-color: #93c5fd;
+  box-shadow: 0 15px 35px rgba(15,23,42,.1);
+}
+
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+
+.category {
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+
+.arrow {
+  color: #94a3b8;
+  font-size: 20px;
+}
+
+
+.calculator-card h3 {
+  margin: 0 0 8px;
+  font-size: 19px;
+}
+
+
+.calculator-card p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+
+.keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 15px;
+}
+
+
+.keywords span {
+  padding: 4px 7px;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 5px;
+  font-size: 10px;
+}
+
+
+.no-results {
+  text-align: center;
+  padding: 70px 20px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 18px;
+}
+
+
+.no-results-icon {
+  font-size: 40px;
+}
+
+
+@media (max-width: 900px) {
+
+  .calculator-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .calculator-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-container {
+    flex-wrap: wrap;
+  }
+
+  .search-container input {
+    flex-basis: 100%;
+  }
+
+  .search-container button {
+    height: 42px;
+  }
+
+  .results-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+}
+
+</style>

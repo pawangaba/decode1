@@ -1,0 +1,5 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { categories, calculators } from "../../engine/calculator-registry";
+---
+<BaseLayout title="Calculator Categories"><div class="calculator-wrap"><div class="calc-header"><h1>Browse by specialty</h1><p>Clinical, laboratory and scientific tools.</p></div><div class="grid category-grid">{categories.map(c=><a class="card" href={`/categories/${c.toLowerCase().replaceAll(" ","-")}/`}><h3>{c}</h3><p class="muted">{calculators.filter(x=>x.category===c).length} calculators</p></a>)}</div></div></BaseLayout>

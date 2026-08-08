@@ -1,0 +1,38 @@
+---
+const { title = "LABDECODED", description = "Medical and laboratory calculators." } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/src/styles/global.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title} | LABDECODED</title>
+  <meta name="description" content={description} />
+  <link rel="icon" href="/favicon.svg" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <img src="/logo.png" alt="LABDECODED" class="brand-logo" width="120" height="70" />
+    </a>
+    <nav>
+      <a href="/calculators/">Calculators</a>
+      <a href="/categories/">Categories</a>
+      <a href="/about/">About</a>
+    </nav>
+    <button id="theme" aria-label="Toggle theme">☾</button>
+  </header>
+  <main><slot /></main>
+  <footer>
+    <div><strong>LABDECODED</strong><p>Decode the Lab. Understand the Numbers.</p></div>
+    <div><a href="/calculators/">Calculators</a><a href="/disclaimer/">Disclaimer</a><a href="/privacy/">Privacy</a></div>
+    <p class="copyright">© 2026 LABDECODED. Educational and informational use.</p>
+  </footer>
+  <script>
+    const b=document.getElementById('theme');
+    b?.addEventListener('click',()=>{document.documentElement.classList.toggle('dark');localStorage.setItem('ld-theme',document.documentElement.classList.contains('dark')?'dark':'light')});
+    if(localStorage.getItem('ld-theme')==='dark') document.documentElement.classList.add('dark');
+  </script>
+</body>
+</html>

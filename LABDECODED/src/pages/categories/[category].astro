@@ -1,0 +1,10 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { categories, calculators } from "../../engine/calculator-registry";
+export function getStaticPaths(){return categories.map(c=>({params:{category:c.toLowerCase().replaceAll(" ","-")},props:{name:c}}))}
+const name=Astro.props.name;
+const items=calculators.filter(c=>c.category===name);
+---
+<BaseLayout title={`${name} Calculators`} description={`LABDECODED ${name} calculators.`}>
+<div class="calculator-wrap"><div class="calc-header"><span class="tag">SPECIALTY</span><h1>{name} Calculators</h1><p>{items.length} calculators for {name.toLowerCase()} and related laboratory work.</p></div><div class="grid" style="margin-top:28px">{items.map(c=><a class="card" href={`/calculators/${c.slug}/`}><h3>{c.title}</h3><p class="muted">{c.description}</p></a>)}</div></div>
+</BaseLayout>
